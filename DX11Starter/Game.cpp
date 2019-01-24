@@ -21,8 +21,6 @@ Game::Game(HINSTANCE hInstance)
 		true)			// Show extra stats (fps) in title bar?
 {
 	// Initialize fields
-	vertexBuffer = 0;
-	indexBuffer = 0;
 	vertexShader = 0;
 	pixelShader = 0;
 
@@ -43,8 +41,8 @@ Game::~Game()
 {
 	// Release any (and all!) DirectX objects
 	// we've made in the Game class
-	if (vertexBuffer) { vertexBuffer->Release(); }
-	if (indexBuffer) { indexBuffer->Release(); }
+	/*if (vertexBuffer) { vertexBuffer->Release(); }
+	if (indexBuffer) { indexBuffer->Release(); }*/
 
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
