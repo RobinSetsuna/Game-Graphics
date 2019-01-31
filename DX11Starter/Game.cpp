@@ -48,6 +48,9 @@ Game::~Game()
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
 	delete pixelShader;
+	delete star;
+	delete square;
+	delete triangle;
 }
 
 // --------------------------------------------------------
@@ -59,9 +62,65 @@ void Game::Init()
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
-	LoadShaders();
+	star = new Mesh();
+	square = new Mesh();
+	triangle = new Mesh();
+
+	//colors
+	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+
+	//triangle
+	Vertex vertices[] =
+	{
+		// Comparative postion in the window
+		{ XMFLOAT3(-10.0f, +3.0f, +0.0f), red },
+		{ XMFLOAT3(-5.5f, -3.0f, +0.0f), red },
+		{ XMFLOAT3(-14.5f, -3.0f, +0.0f), red },
+	};
+	int indices[] = { 0, 1, 2 };
+
+	//square
+	Vertex verticesSquare[] =
+	{
+		// Comparative postion in the window
+		{ XMFLOAT3(+6.5f, +4.5f, +0.0f), green },
+		{ XMFLOAT3(+15.5f, +4.5f, +0.0f), green },
+		{ XMFLOAT3(+15.5f, -4.5f, +0.0f), green },
+		{ XMFLOAT3(+6.5f, -4.5f, +0.0f), green },
+	};
+	int indicesSquare[] = { 0, 1, 2, 0, 2, 3 };
+
+	//star
+	Vertex verticesStar[] =
+	{
+		// Comparative postion in the window
+		{ XMFLOAT3(+0.0f, +5.0f, +0.0f), blue },
+		{ XMFLOAT3(+4.5f, +2.5f, +0.0f), blue },
+		{ XMFLOAT3(+4.5f, -2.5f, +0.0f), blue },
+		{ XMFLOAT3(+0.0f, -5.0f, +0.0f), blue },
+		{ XMFLOAT3(-4.5f, -2.5f, +0.0f), blue },
+		{ XMFLOAT3(-4.5f, +2.5f, +0.0f), blue },
+	};
+	int indicesStar[] = { 0, 2, 4, 1, 3, 5 };
+
+	triangle->CreateBasicGeometry(vertices, sizeof(vertices) / sizeof(vertices[0]), indices, sizeof(indices) / sizeof(indices[0]), device);
+	square->CreateBasicGeometry(verticesSquare, sizeof(verticesSquare) / sizeof(verticesSquare[0]), indicesSquare, sizeof(indicesSquare) / sizeof(indicesSquare[0]), device);
+	star->CreateBasicGeometry(verticesStar, sizeof(verticesStar) / sizeof(verticesStar[0]), indicesStar, sizeof(indicesStar) / sizeof(indicesStar[0]), device);
+
+	for (int i = 0; i < 3; i++)
+	{
+		entities[i] = Entity(star);
+	}
+	entities[3] = Entity(square);
+	entities[4] = Entity(triangle);
+
 	CreateMatrices();
-	CreateBasicGeometry();
+	LoadShaders();
+
+
+
 
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
@@ -129,59 +188,6 @@ void Game::CreateMatrices()
 }
 
 
-// --------------------------------------------------------
-// Creates the geometry we're going to draw - a single triangle for now
-// --------------------------------------------------------
-void Game::CreateBasicGeometry()
-{
-	//colors
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-
-	//triangle
-	Vertex vertices[] =
-	{
-		// Comparative postion in the window
-		{ XMFLOAT3(-10.0f, +3.0f, +0.0f), red },
-		{ XMFLOAT3(-5.5f, -3.0f, +0.0f), red },
-		{ XMFLOAT3(-14.5f, -3.0f, +0.0f), red },
-	};
-	int indices[] = { 0, 1, 2 };
-
-	//square
-	Vertex verticesSquare[] =
-	{
-		// Comparative postion in the window
-		{ XMFLOAT3(+6.5f, +4.5f, +0.0f), green },
-		{ XMFLOAT3(+15.5f, +4.5f, +0.0f), green },
-		{ XMFLOAT3(+15.5f, -4.5f, +0.0f), green },
-		{ XMFLOAT3(+6.5f, -4.5f, +0.0f), green },
-	};
-	int indicesSquare[] = { 0, 1, 2, 0, 2, 3 };
-
-	//star
-	Vertex verticesStar[] =
-	{
-		// Comparative postion in the window
-		{ XMFLOAT3(+0.0f, +5.0f, +0.0f), blue },
-		{ XMFLOAT3(+4.5f, +2.5f, +0.0f), blue },
-		{ XMFLOAT3(+4.5f, -2.5f, +0.0f), blue },
-		{ XMFLOAT3(+0.0f, -5.0f, +0.0f), blue },
-		{ XMFLOAT3(-4.5f, -2.5f, +0.0f), blue },
-		{ XMFLOAT3(-4.5f, +2.5f, +0.0f), blue },
-	};
-	int indicesStar[] = { 0, 2, 4, 1, 3, 5 };
-
-	triangle.CreateBasicGeometry(vertices, sizeof(vertices)/sizeof(vertices[0]), indices, sizeof(indices) / sizeof(indices[0]), device);
-	//printf("Vertex Number is %d\n", sizeof(verticesSquare) / sizeof(verticesSquare[0]));
-	//printf("Index Number is %d\n", sizeof(indicesSquare) / sizeof(indicesSquare[0]));
-	square.CreateBasicGeometry(verticesSquare, sizeof(verticesSquare) / sizeof(verticesSquare[0]), indicesSquare, sizeof(indicesSquare) / sizeof(indicesSquare[0]), device);
-	star.CreateBasicGeometry(verticesStar, sizeof(verticesStar) / sizeof(verticesStar[0]), indicesStar, sizeof(indicesStar) / sizeof(indicesStar[0]), device);
-
-
-
-}
 
 
 // --------------------------------------------------------
@@ -210,6 +216,13 @@ void Game::Update(float deltaTime, float totalTime)
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
+	entities[0].Move(deltaTime, 0, 0);
+	entities[1].Move(0, deltaTime, 0);
+	entities[2].Scale(deltaTime*0.1, deltaTime*0.1, deltaTime*0.1);
+	entities[2].Rotate(0, 0, deltaTime);
+	entities[3].Move(-deltaTime, -deltaTime, 0);
+	entities[4].Move(deltaTime, -deltaTime, 0);
+	entities[4].Rotate(0, 0, deltaTime);
 }
 
 // --------------------------------------------------------
@@ -235,46 +248,37 @@ void Game::Draw(float deltaTime, float totalTime)
 	//  - This is actually a complex process of copying data to a local buffer
 	//    and then copying that entire buffer to the GPU.  
 	//  - The "SimpleShader" class handles all of that for you.
-	vertexShader->SetMatrix4x4("world", worldMatrix);
-	vertexShader->SetMatrix4x4("view", viewMatrix);
-	vertexShader->SetMatrix4x4("projection", projectionMatrix);
+	//obj1.SetTranslation(0, 0, 0);
+	for (int i = 0; i < 5; i++)
+	{
+		vertexShader->SetMatrix4x4("world", entities[i].GetWorldMatrix());
+		vertexShader->SetMatrix4x4("view", viewMatrix);
+		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 
-	// Once you've set all of the data you care to change for
-	// the next draw call, you need to actually send it to the GPU
-	//  - If you skip this, the "SetMatrix" calls above won't make it to the GPU!
-	vertexShader->CopyAllBufferData();
+		// Once you've set all of the data you care to change for
+		// the next draw call, you need to actually send it to the GPU
+		//  - If you skip this, the "SetMatrix" calls above won't make it to the GPU!
+		vertexShader->CopyAllBufferData();
 
-	// Set the vertex and pixel shaders to use for the next Draw() command
-	//  - These don't technically need to be set every frame...YET
-	//  - Once you start applying different shaders to different objects,
-	//    you'll need to swap the current shaders before each draw
-	vertexShader->SetShader();
-	pixelShader->SetShader();
+		// Set the vertex and pixel shaders to use for the next Draw() command
+		//  - These don't technically need to be set every frame...YET
+		//  - Once you start applying different shaders to different objects,
+		//    you'll need to swap the current shaders before each draw
+		vertexShader->SetShader();
+		pixelShader->SetShader();
 
-	// Set buffers in the input assembler
-	//  - Do this ONCE PER OBJECT you're drawing, since each object might
-	//    have different geometry.
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
+		// Set buffers in the input assembler
+		//  - Do this ONCE PER OBJECT you're drawing, since each object might
+		//    have different geometry.
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
 
-	//square
-	ID3D11Buffer* vbuffer = square.GetVertexBuffer();
-	context->IASetVertexBuffers(0, 1, &vbuffer, &stride, &offset);
-	context->IASetIndexBuffer(square.GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-	context->DrawIndexed(square.GetIndexNumber(), 0, 0);  
-	
-	//triangle
-	vbuffer = triangle.GetVertexBuffer();
-	context->IASetVertexBuffers(0, 1, &vbuffer, &stride, &offset);
-	context->IASetIndexBuffer(triangle.GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-	context->DrawIndexed(triangle.GetIndexNumber(), 0, 0);
-
-	//star
-	vbuffer = star.GetVertexBuffer();
-	context->IASetVertexBuffers(0, 1, &vbuffer, &stride, &offset);
-	context->IASetIndexBuffer(star.GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-	context->DrawIndexed(star.GetIndexNumber(), 0, 0);
-
+		//square
+		ID3D11Buffer* vbuffer = entities[i].mesh->GetVertexBuffer();
+		context->IASetVertexBuffers(0, 1, &vbuffer, &stride, &offset);
+		context->IASetIndexBuffer(entities[i].mesh->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+		context->DrawIndexed(entities[i].mesh->GetIndexNumber(), 0, 0);
+	}
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it

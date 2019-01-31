@@ -3,6 +3,7 @@
 #include "DXCore.h"
 #include "SimpleShader.h"
 #include "Mesh.h"
+#include "Entity.h"
 #include <DirectXMath.h>
 
 class Game 
@@ -45,8 +46,10 @@ private:
 	// determining how far the mouse moved in a single frame.
 	POINT prevMousePos;
 
-	Mesh star;
-	Mesh triangle;
-	Mesh square;
+	Mesh* star;
+	Mesh* triangle;
+	Mesh* square;
+
+	Entity entities[5];
 };
 
