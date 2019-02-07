@@ -4,7 +4,9 @@
 #include "SimpleShader.h"
 #include "Mesh.h"
 #include "Entity.h"
+#include "Material.h"
 #include <DirectXMath.h>
+#include "Camera.h"
 
 class Game 
 	: public DXCore
@@ -51,5 +53,9 @@ private:
 	Mesh* square;
 
 	Entity entities[5];
+	Camera* cam;
+	Material* mat;
+
+	bool mouseDown;
 };
 

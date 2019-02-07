@@ -51,6 +51,8 @@ Game::~Game()
 	delete star;
 	delete square;
 	delete triangle;
+	delete cam;
+	delete mat;
 }
 
 // --------------------------------------------------------
@@ -62,9 +64,13 @@ void Game::Init()
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
+	LoadShaders();
+	mouseDown = false;
 	star = new Mesh();
 	square = new Mesh();
 	triangle = new Mesh();
+	cam = new Camera(width, height);
+	mat = new Material(vertexShader, pixelShader);
 
 	//colors
 	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -111,13 +117,12 @@ void Game::Init()
 
 	for (int i = 0; i < 3; i++)
 	{
-		entities[i] = Entity(star);
+		entities[i] = Entity(star, mat);
 	}
-	entities[3] = Entity(square);
-	entities[4] = Entity(triangle);
+	entities[3] = Entity(square, mat);
+	entities[4] = Entity(triangle, mat);
 
-	CreateMatrices();
-	LoadShaders();
+
 
 
 
@@ -216,13 +221,49 @@ void Game::Update(float deltaTime, float totalTime)
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
+
 	entities[0].Move(deltaTime, 0, 0);
 	entities[1].Move(0, deltaTime, 0);
-	entities[2].Scale(deltaTime*0.1, deltaTime*0.1, deltaTime*0.1);
+	entities[2].Scale(deltaTime*0.1f, deltaTime*0.1f, deltaTime*0.1f);
 	entities[2].Rotate(0, 0, deltaTime);
 	entities[3].Move(-deltaTime, -deltaTime, 0);
 	entities[4].Move(deltaTime, -deltaTime, 0);
 	entities[4].Rotate(0, 0, deltaTime);
+
+	XMVECTOR dir = XMVectorScale(XMLoadFloat3(&cam->GetDirection()), deltaTime * 10);
+	XMVECTOR up = XMVectorSet(0, deltaTime * 10, 0, 0);
+	XMVECTOR left = XMVectorScale(XMVector3Normalize(XMVector3Cross(dir, up)), deltaTime * 10);
+	XMVECTOR incrementVector = XMVectorSet(0,0,0,0);
+	XMVECTOR pos = XMLoadFloat3(&cam->GetPosition());
+
+	XMMATRIX V = XMLoadFloat4x4(&cam->GetViewMatrix());
+	if (GetAsyncKeyState('W') & 0x8000)
+	{
+		incrementVector = XMVectorAdd(incrementVector, dir);
+	}
+	if (GetAsyncKeyState('S') & 0x8000)
+	{
+		incrementVector = XMVectorSubtract(incrementVector, dir);
+	}
+	if (GetAsyncKeyState('A') & 0x8000)
+	{
+		incrementVector = XMVectorAdd(incrementVector, left);
+	}
+	if (GetAsyncKeyState('D') & 0x8000)
+	{
+		incrementVector = XMVectorSubtract(incrementVector, left);
+	}
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+	{
+		incrementVector = XMVectorAdd(incrementVector, up);
+	}
+	if (GetAsyncKeyState('X') & 0x8000)
+	{
+		incrementVector = XMVectorSubtract(incrementVector, up);
+	}
+	XMVECTOR newPos = XMVectorAdd(pos, incrementVector);
+	V = XMMatrixLookToLH(newPos, dir, up);
+	cam->Update(newPos, V);
 }
 
 // --------------------------------------------------------
@@ -251,21 +292,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//obj1.SetTranslation(0, 0, 0);
 	for (int i = 0; i < 5; i++)
 	{
-		vertexShader->SetMatrix4x4("world", entities[i].GetWorldMatrix());
-		vertexShader->SetMatrix4x4("view", viewMatrix);
-		vertexShader->SetMatrix4x4("projection", projectionMatrix);
-
-		// Once you've set all of the data you care to change for
-		// the next draw call, you need to actually send it to the GPU
-		//  - If you skip this, the "SetMatrix" calls above won't make it to the GPU!
-		vertexShader->CopyAllBufferData();
-
-		// Set the vertex and pixel shaders to use for the next Draw() command
-		//  - These don't technically need to be set every frame...YET
-		//  - Once you start applying different shaders to different objects,
-		//    you'll need to swap the current shaders before each draw
-		vertexShader->SetShader();
-		pixelShader->SetShader();
+		entities[i].PrepareMaterial(cam->GetViewMatrix(), cam->GetProjectionMatrix());
 
 		// Set buffers in the input assembler
 		//  - Do this ONCE PER OBJECT you're drawing, since each object might
@@ -297,7 +324,7 @@ void Game::Draw(float deltaTime, float totalTime)
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	mouseDown = true;
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
@@ -314,7 +341,7 @@ void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	mouseDown = false;
 	// We don't care about the tracking the cursor outside
 	// the window anymore (we're not dragging if the mouse is up)
 	ReleaseCapture();
@@ -328,7 +355,13 @@ void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	if (mouseDown == true)
+	{
+		int offsetX = x - prevMousePos.x;
+		int offsetY = y - prevMousePos.y;
+		cam->SetRotation(offsetY * 0.005f, offsetX * 0.005f);
+		cam->Rotate();
+	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;

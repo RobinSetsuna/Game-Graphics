@@ -1,7 +1,8 @@
-#pragma once
+  #pragma once
 #include "DXCore.h"
 #include "SimpleShader.h"
 #include "Mesh.h"
+#include "Material.h"
 #include <DirectXMath.h>
 #include "Vertex.h"
 using namespace DirectX;
@@ -9,7 +10,7 @@ using namespace DirectX;
 class Entity
 {
 public:
-	Entity(Mesh*);
+	Entity(Mesh*, Material*);
 	Entity();
 	//~Entity();
 	Mesh * mesh;
@@ -33,11 +34,14 @@ public:
 	void Scale(float, float, float);
 	void Rotate(float, float, float);
 
+	void PrepareMaterial(XMFLOAT4X4, XMFLOAT4X4);
+
 private:
 	XMFLOAT4X4 worldMatrix;
 	XMFLOAT3 scale;
 	XMFLOAT3 rotation;
 	XMFLOAT3 translation;
+	Material* mat;
 	bool update = true;
 	void UpdateWorldMatrix();
 };
