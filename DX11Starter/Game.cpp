@@ -234,9 +234,7 @@ void Game::Update(float deltaTime, float totalTime)
 	XMVECTOR up = XMVectorSet(0, deltaTime * 10, 0, 0);
 	XMVECTOR left = XMVectorScale(XMVector3Normalize(XMVector3Cross(dir, up)), deltaTime * 10);
 	XMVECTOR incrementVector = XMVectorSet(0,0,0,0);
-	XMVECTOR pos = XMLoadFloat3(&cam->GetPosition());
 
-	XMMATRIX V = XMLoadFloat4x4(&cam->GetViewMatrix());
 	if (GetAsyncKeyState('W') & 0x8000)
 	{
 		incrementVector = XMVectorAdd(incrementVector, dir);
@@ -261,9 +259,8 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		incrementVector = XMVectorSubtract(incrementVector, up);
 	}
-	XMVECTOR newPos = XMVectorAdd(pos, incrementVector);
-	V = XMMatrixLookToLH(newPos, dir, up);
-	cam->Update(newPos, V);
+
+	cam->Update(incrementVector);
 }
 
 // --------------------------------------------------------

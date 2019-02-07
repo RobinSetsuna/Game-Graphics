@@ -10,7 +10,7 @@ class Camera
 public:
 	~Camera();
 	Camera(unsigned int, unsigned int);
-	void Update(XMVECTOR, XMMATRIX);
+	void Update(XMVECTOR);
 	void SetRotationX(float);
 	void SetRotationY(float);
 	void SetPosition(float, float, float);

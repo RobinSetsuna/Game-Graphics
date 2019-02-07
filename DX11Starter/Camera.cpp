@@ -35,9 +35,18 @@ Camera::Camera(unsigned int width, unsigned int height)
 	RotationAroundY = 0;
 }
 
-void Camera::Update(XMVECTOR newPos, XMMATRIX V)
+void Camera::Update(XMVECTOR inc)
 {
+
+	XMVECTOR pos = XMLoadFloat3(&GetPosition());
+	XMVECTOR dir = XMLoadFloat3(&GetDirection());
+	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
+	XMVECTOR newPos = XMVectorAdd(pos, inc);
+
+	XMMATRIX V = XMMatrixLookToLH(newPos, dir, up);
+
 	XMStoreFloat3(&position, newPos);
+
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V));
 }
 

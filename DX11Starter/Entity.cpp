@@ -15,13 +15,6 @@ Entity::Entity(Mesh* _mesh, Material* _mat)
 
 Entity::Entity()
 {
-	mesh = nullptr;
-	XMMATRIX W = XMMatrixIdentity();
-	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W));
-
-	translation = XMFLOAT3(0, 0, 0);
-	scale = XMFLOAT3(1, 1, 1);
-	rotation = XMFLOAT3(0, 0, 0);
 }
 
 XMFLOAT4X4 Entity::GetWorldMatrix()
