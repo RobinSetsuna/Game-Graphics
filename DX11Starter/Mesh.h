@@ -9,7 +9,8 @@ class Mesh
 {
 public:
 	~Mesh();
-	void CreateBasicGeometry(Vertex*, int, int*, int, ID3D11Device*);
+	void CreateBasicGeometry(Vertex*, int, UINT*, int, ID3D11Device*);
+	Mesh::Mesh(const char * objFile, ID3D11Device* d);
 	ID3D11Buffer* GetVertexBuffer();
 	ID3D11Buffer* GetIndexBuffer();
 	int GetIndexNumber();
@@ -23,7 +24,7 @@ private:
 	int indexArrayNumber;
 
 	Vertex* vertices;
-	int* indices;
+	UINT* indices;
 
 
 };

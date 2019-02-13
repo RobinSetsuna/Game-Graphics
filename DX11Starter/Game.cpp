@@ -48,9 +48,6 @@ Game::~Game()
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
 	delete pixelShader;
-	delete star;
-	delete square;
-	delete triangle;
 	delete cam;
 	delete mat;
 }
@@ -66,61 +63,11 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	mouseDown = false;
-	star = new Mesh();
-	square = new Mesh();
-	triangle = new Mesh();
 	cam = new Camera(width, height);
 	mat = new Material(vertexShader, pixelShader);
+	Bench = new Mesh("helix.obj", device);
 
-	//colors
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-
-	//triangle
-	Vertex vertices[] =
-	{
-		// Comparative postion in the window
-		{ XMFLOAT3(-10.0f, +3.0f, +0.0f), red },
-		{ XMFLOAT3(-5.5f, -3.0f, +0.0f), red },
-		{ XMFLOAT3(-14.5f, -3.0f, +0.0f), red },
-	};
-	int indices[] = { 0, 1, 2 };
-
-	//square
-	Vertex verticesSquare[] =
-	{
-		// Comparative postion in the window
-		{ XMFLOAT3(+6.5f, +4.5f, +0.0f), green },
-		{ XMFLOAT3(+15.5f, +4.5f, +0.0f), green },
-		{ XMFLOAT3(+15.5f, -4.5f, +0.0f), green },
-		{ XMFLOAT3(+6.5f, -4.5f, +0.0f), green },
-	};
-	int indicesSquare[] = { 0, 1, 2, 0, 2, 3 };
-
-	//star
-	Vertex verticesStar[] =
-	{
-		// Comparative postion in the window
-		{ XMFLOAT3(+0.0f, +5.0f, +0.0f), blue },
-		{ XMFLOAT3(+4.5f, +2.5f, +0.0f), blue },
-		{ XMFLOAT3(+4.5f, -2.5f, +0.0f), blue },
-		{ XMFLOAT3(+0.0f, -5.0f, +0.0f), blue },
-		{ XMFLOAT3(-4.5f, -2.5f, +0.0f), blue },
-		{ XMFLOAT3(-4.5f, +2.5f, +0.0f), blue },
-	};
-	int indicesStar[] = { 0, 2, 4, 1, 3, 5 };
-
-	triangle->CreateBasicGeometry(vertices, sizeof(vertices) / sizeof(vertices[0]), indices, sizeof(indices) / sizeof(indices[0]), device);
-	square->CreateBasicGeometry(verticesSquare, sizeof(verticesSquare) / sizeof(verticesSquare[0]), indicesSquare, sizeof(indicesSquare) / sizeof(indicesSquare[0]), device);
-	star->CreateBasicGeometry(verticesStar, sizeof(verticesStar) / sizeof(verticesStar[0]), indicesStar, sizeof(indicesStar) / sizeof(indicesStar[0]), device);
-
-	for (int i = 0; i < 3; i++)
-	{
-		entities[i] = Entity(star, mat);
-	}
-	entities[3] = Entity(square, mat);
-	entities[4] = Entity(triangle, mat);
+	entities[0] = Entity(Bench, mat);
 
 
 
@@ -222,13 +169,13 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 
-	entities[0].Move(deltaTime, 0, 0);
-	entities[1].Move(0, deltaTime, 0);
-	entities[2].Scale(deltaTime*0.1f, deltaTime*0.1f, deltaTime*0.1f);
-	entities[2].Rotate(0, 0, deltaTime);
-	entities[3].Move(-deltaTime, -deltaTime, 0);
-	entities[4].Move(deltaTime, -deltaTime, 0);
-	entities[4].Rotate(0, 0, deltaTime);
+	//entities[0].Move(deltaTime, 0, 0);
+	//entities[1].Move(0, deltaTime, 0);
+	//entities[2].Scale(deltaTime*0.1f, deltaTime*0.1f, deltaTime*0.1f);
+	//entities[2].Rotate(0, 0, deltaTime);
+	//entities[3].Move(-deltaTime, -deltaTime, 0);
+	//entities[4].Move(deltaTime, -deltaTime, 0);
+	//entities[4].Rotate(0, 0, deltaTime);
 
 	XMVECTOR dir = XMVectorScale(XMLoadFloat3(&cam->GetDirection()), deltaTime * 10);
 	XMVECTOR up = XMVectorSet(0, deltaTime * 10, 0, 0);
@@ -287,7 +234,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//    and then copying that entire buffer to the GPU.  
 	//  - The "SimpleShader" class handles all of that for you.
 	//obj1.SetTranslation(0, 0, 0);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		entities[i].PrepareMaterial(cam->GetViewMatrix(), cam->GetProjectionMatrix());
 
