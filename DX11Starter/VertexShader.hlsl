@@ -43,6 +43,7 @@ struct VertexToPixel
 	//  |    |                |
 	//  v    v                v
 	float4 position		: SV_POSITION;	// XYZW position (System Value Position)
+	float3 normal		: NORMAL;
 	//float4 color		: COLOR;        // RGBA color
 };
 
@@ -57,6 +58,11 @@ VertexToPixel main( VertexShaderInput input )
 {
 	// Set up output struct
 	VertexToPixel output;
+
+	//output normal
+	output.normal = mul(input.normal, (float3x3)world);
+
+
 
 	// The vertex's position (input.position) must be converted to world space,
 	// then camera space (relative to our 3D camera), then to proper homogenous 

@@ -129,6 +129,7 @@ void Entity::PrepareMaterial(XMFLOAT4X4 v, XMFLOAT4X4 p)
 	//  - Once you start applying different shaders to different objects,
 	//    you'll need to swap the current shaders before each draw
 	mat->GetVertexShader()->SetShader();
+	mat->GetPixelShader()->CopyAllBufferData();
 	mat->GetPixelShader()->SetShader();
 }
 

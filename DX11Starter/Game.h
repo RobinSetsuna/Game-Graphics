@@ -7,6 +7,7 @@
 #include "Material.h"
 #include <DirectXMath.h>
 #include "Camera.h"
+#include "Lights.h"
 
 class Game 
 	: public DXCore
@@ -55,5 +56,6 @@ private:
 	Material* mat;
 
 	bool mouseDown;
+	DiretionalLight dirLight;
 };
 

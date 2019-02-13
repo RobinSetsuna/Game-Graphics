@@ -64,14 +64,12 @@ void Game::Init()
 	LoadShaders();
 	mouseDown = false;
 	cam = new Camera(width, height);
+	dirLight.Init();
+	pixelShader->SetData("DirLight", &dirLight, sizeof(DiretionalLight));
 	mat = new Material(vertexShader, pixelShader);
 	Bench = new Mesh("helix.obj", device);
-
+	
 	entities[0] = Entity(Bench, mat);
-
-
-
-
 
 
 	// Tell the input assembler stage of the pipeline what kind of
