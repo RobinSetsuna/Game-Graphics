@@ -49,7 +49,7 @@ private:
 	// determining how far the mouse moved in a single frame.
 	POINT prevMousePos;
 
-	Mesh* Bench;
+	Mesh* bench;
 
 	Entity entities[1];
 	Camera* cam;

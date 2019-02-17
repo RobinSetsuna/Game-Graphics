@@ -50,7 +50,7 @@ Game::~Game()
 	delete pixelShader;
 	delete cam;
 	delete mat;
-	delete Bench;
+	delete bench;
 }
 
 // --------------------------------------------------------
@@ -59,12 +59,11 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
-	// Helper methods for loading shaders, creating some basic
-	// geometry to draw and some simple camera matrices.
-	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	mouseDown = false;
 	cam = new Camera(width, height);
+	bench = new Mesh("helix.obj", device);
+	mat = new Material(vertexShader, pixelShader);
 
 	DiretionalLight dirLight1;
 	dirLight1.Init(XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f), XMFLOAT4(0.2470f, 0.f, 0.4f, 1), XMFLOAT3(1, 0, 0));
@@ -73,25 +72,12 @@ void Game::Init()
 
 	pixelShader->SetData("DirLight1", &dirLight1, sizeof(DiretionalLight));
 	pixelShader->SetData("DirLight2", &dirLight2, sizeof(DiretionalLight));
-
-	Bench = new Mesh("helix.obj", device);
-	mat = new Material(vertexShader, pixelShader);
 	
-	entities[0] = Entity(Bench, mat);
+	entities[0] = Entity(bench, mat);
 
-
-	// Tell the input assembler stage of the pipeline what kind of
-	// geometric primitives (points, lines or triangles) we want to draw.  
-	// Essentially: "What kind of shape should the GPU draw with our data?"
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-// --------------------------------------------------------
-// Loads shaders from compiled shader object (.cso) files using
-// my SimpleShader wrapper for DirectX shader manipulation.
-// - SimpleShader provides helpful methods for sending
-//   data to individual variables on the GPU
-// --------------------------------------------------------
 void Game::LoadShaders()
 {
 	vertexShader = new SimpleVertexShader(device, context);
@@ -100,53 +86,6 @@ void Game::LoadShaders()
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(L"PixelShader.cso");
 }
-
-
-
-// --------------------------------------------------------
-// Initializes the matrices necessary to represent our geometry's 
-// transformations and our 3D camera
-// --------------------------------------------------------
-void Game::CreateMatrices()
-{
-	// Set up world matrix
-	// - In an actual game, each object will need one of these and they should
-	//    update when/if the object moves (every frame)
-	// - You'll notice a "transpose" happening below, which is redundant for
-	//    an identity matrix.  This is just to show that HLSL expects a different
-	//    matrix (column major vs row major) than the DirectX Math library
-	XMMATRIX W = XMMatrixIdentity();
-	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); // Transpose for HLSL!
-
-	// Create the View matrix
-	// - In an actual game, recreate this matrix every time the camera 
-	//    moves (potentially every frame)
-	// - We're using the LOOK TO function, which takes the position of the
-	//    camera and the direction vector along which to look (as well as "up")
-	// - Another option is the LOOK AT function, to look towards a specific
-	//    point in 3D space
-	XMVECTOR pos = XMVectorSet(0, 0, -30, 0);
-	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
-	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
-	XMMATRIX V = XMMatrixLookToLH(
-		pos,     // The position of the "camera"
-		dir,     // Direction the camera is looking
-		up);     // "Up" direction in 3D space (prevents roll)
-	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V)); // Transpose for HLSL!
-
-	// Create the Projection matrix
-	// - This should match the window's aspect ratio, and also update anytime
-	//    the window resizes (which is already happening in OnResize() below)
-	XMMATRIX P = XMMatrixPerspectiveFovLH(
-		0.25f * 3.1415926535f,		// Field of View Angle
-		(float)width / height,		// Aspect ratio
-		0.1f,						// Near clip plane distance
-		100.0f);					// Far clip plane distance
-	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
-}
-
-
-
 
 // --------------------------------------------------------
 // Handle resizing DirectX "stuff" to match the new window size.
