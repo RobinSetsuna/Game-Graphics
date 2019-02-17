@@ -8,7 +8,7 @@ Camera::~Camera()
 
 Camera::Camera(unsigned int width, unsigned int height)
 {
-	XMVECTOR pos = XMVectorSet(0, 0, -30, 0);
+	XMVECTOR pos = XMVectorSet(0, 0, -2, 0);
 	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
 	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
 	XMVECTOR ri = XMVectorSet(-1, 0, 0, 0);

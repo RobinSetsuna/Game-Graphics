@@ -11,10 +11,10 @@ struct DiretionalLight
 	XMFLOAT4 DiffuseColor;
 	XMFLOAT3 Direction;
 
-	void Init()
+	void Init(XMFLOAT4 ac, XMFLOAT4 dc, XMFLOAT3 dir)
 	{
-		AmbientColor = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		DiffuseColor = XMFLOAT4(0, 0, 1, 1);
-		Direction = XMFLOAT3(1, -1, 0);
+		AmbientColor = ac;
+		DiffuseColor = dc;
+		Direction = dir;
 	}
 };

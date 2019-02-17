@@ -56,6 +56,5 @@ private:
 	Material* mat;
 
 	bool mouseDown;
-	DiretionalLight dirLight;
 };
 
