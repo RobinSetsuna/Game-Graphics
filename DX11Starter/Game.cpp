@@ -50,6 +50,7 @@ Game::~Game()
 	delete pixelShader;
 	delete cam;
 	delete mat;
+	delete Bench;
 }
 
 // --------------------------------------------------------
@@ -64,10 +65,17 @@ void Game::Init()
 	LoadShaders();
 	mouseDown = false;
 	cam = new Camera(width, height);
-	dirLight.Init();
-	pixelShader->SetData("DirLight", &dirLight, sizeof(DiretionalLight));
-	mat = new Material(vertexShader, pixelShader);
+
+	DiretionalLight dirLight1;
+	dirLight1.Init(XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f), XMFLOAT4(0.2470f, 0.f, 0.4f, 1), XMFLOAT3(1, 0, 0));
+	DiretionalLight dirLight2;
+	dirLight2.Init(XMFLOAT4(0.2f, 0.3f, 0.35f, 1.0f), XMFLOAT4(0.2f, 0.2f, 1.f, 1), XMFLOAT3(0, 0, 1));
+
+	pixelShader->SetData("DirLight1", &dirLight1, sizeof(DiretionalLight));
+	pixelShader->SetData("DirLight2", &dirLight2, sizeof(DiretionalLight));
+
 	Bench = new Mesh("helix.obj", device);
+	mat = new Material(vertexShader, pixelShader);
 	
 	entities[0] = Entity(Bench, mat);
 
@@ -167,7 +175,7 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 
-	//entities[0].Move(deltaTime, 0, 0);
+	entities[0].Rotate(0, deltaTime, 0);
 	//entities[1].Move(0, deltaTime, 0);
 	//entities[2].Scale(deltaTime*0.1f, deltaTime*0.1f, deltaTime*0.1f);
 	//entities[2].Rotate(0, 0, deltaTime);
@@ -245,6 +253,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		//square
 		ID3D11Buffer* vbuffer = entities[i].mesh->GetVertexBuffer();
 		context->IASetVertexBuffers(0, 1, &vbuffer, &stride, &offset);
+		entities[i].mesh->GetIndexBuffer();
 		context->IASetIndexBuffer(entities[i].mesh->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 		context->DrawIndexed(entities[i].mesh->GetIndexNumber(), 0, 0);
 	}
