@@ -35,6 +35,8 @@ public:
 	void Rotate(float, float, float);
 
 	void PrepareMaterial(XMFLOAT4X4, XMFLOAT4X4);
+	void CopyBufferToShader();
+	Material* GetMaterial();
 
 private:
 	XMFLOAT4X4 worldMatrix;

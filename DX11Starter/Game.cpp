@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Vertex.h"
+#include "WICTextureLoader.h"
 
 // For the DirectX Math library
 using namespace DirectX;
@@ -49,8 +50,13 @@ Game::~Game()
 	delete vertexShader;
 	delete pixelShader;
 	delete cam;
-	delete mat;
-	delete bench;
+	delete metalMat;
+	delete rustMat;
+	delete helix;
+	delete cone;
+	metalSRV->Release();
+	rustSRV->Release();
+	sampler->Release();
 }
 
 // --------------------------------------------------------
@@ -62,18 +68,24 @@ void Game::Init()
 	LoadShaders();
 	mouseDown = false;
 	cam = new Camera(width, height);
-	bench = new Mesh("helix.obj", device);
-	mat = new Material(vertexShader, pixelShader);
+	helix = new Mesh("../../Meshes/helix.obj", device);	
+	cone = new Mesh("../../Meshes/cone.obj", device);
 
-	DiretionalLight dirLight1;
-	dirLight1.Init(XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f), XMFLOAT4(0.2470f, 0.f, 0.4f, 1), XMFLOAT3(1, 0, 0));
-	DiretionalLight dirLight2;
-	dirLight2.Init(XMFLOAT4(0.2f, 0.3f, 0.35f, 1.0f), XMFLOAT4(0.2f, 0.2f, 1.f, 1), XMFLOAT3(0, 0, 1));
+	CreateWICTextureFromFile(device, context, L"../../Textures/Metal.png", 0, &metalSRV);
+	CreateWICTextureFromFile(device, context, L"../../Textures/rust.jpg", 0, &rustSRV);
+	D3D11_SAMPLER_DESC SamplerDescription = {};
+	SamplerDescription.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	SamplerDescription.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	SamplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	SamplerDescription.Filter = D3D11_FILTER_ANISOTROPIC;
+	SamplerDescription.MaxLOD = D3D11_FLOAT32_MAX;
+	SamplerDescription.MaxAnisotropy = 16;
+	device->CreateSamplerState(&SamplerDescription, &sampler);
 
-	pixelShader->SetData("DirLight1", &dirLight1, sizeof(DiretionalLight));
-	pixelShader->SetData("DirLight2", &dirLight2, sizeof(DiretionalLight));
-	
-	entities[0] = Entity(bench, mat);
+	metalMat = new Material(vertexShader, pixelShader, metalSRV, sampler);
+	rustMat = new Material(vertexShader, pixelShader, rustSRV, sampler);
+	entities[0] = Entity(helix, metalMat);
+	entities[1] = Entity(cone, rustMat);
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -115,7 +127,7 @@ void Game::Update(float deltaTime, float totalTime)
 		Quit();
 
 	entities[0].Rotate(0, deltaTime, 0);
-	//entities[1].Move(0, deltaTime, 0);
+	entities[1].Rotate(0, -deltaTime, 0);
 	//entities[2].Scale(deltaTime*0.1f, deltaTime*0.1f, deltaTime*0.1f);
 	//entities[2].Rotate(0, 0, deltaTime);
 	//entities[3].Move(-deltaTime, -deltaTime, 0);
@@ -179,9 +191,17 @@ void Game::Draw(float deltaTime, float totalTime)
 	//    and then copying that entire buffer to the GPU.  
 	//  - The "SimpleShader" class handles all of that for you.
 	//obj1.SetTranslation(0, 0, 0);
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		entities[i].PrepareMaterial(cam->GetViewMatrix(), cam->GetProjectionMatrix());
+		DiretionalLight dirLight1;
+		dirLight1.Init(XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f), XMFLOAT4(0.2470f, 0.f, 0.4f, 1), XMFLOAT3(1, 0, 0));
+		DiretionalLight dirLight2;
+		dirLight2.Init(XMFLOAT4(0.2f, 0.3f, 0.35f, 1.0f), XMFLOAT4(1.f, 1.f, 1.f, 1), XMFLOAT3(0, 0, 1));
+		pixelShader->SetData("DirLight1", &dirLight1, sizeof(DiretionalLight));
+		pixelShader->SetData("DirLight2", &dirLight2, sizeof(DiretionalLight));
+		entities[i].GetMaterial()->SetTexture();
+		entities[i].CopyBufferToShader();
 
 		// Set buffers in the input assembler
 		//  - Do this ONCE PER OBJECT you're drawing, since each object might

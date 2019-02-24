@@ -49,12 +49,18 @@ private:
 	// determining how far the mouse moved in a single frame.
 	POINT prevMousePos;
 
-	Mesh* bench;
+	Mesh* helix;
+	Mesh* cone;
 
-	Entity entities[1];
+	Entity entities[2];
 	Camera* cam;
-	Material* mat;
+	Material* metalMat;
+	Material* rustMat;
 
 	bool mouseDown;
+
+	ID3D11ShaderResourceView* metalSRV;
+	ID3D11ShaderResourceView* rustSRV;
+	ID3D11SamplerState* sampler;
 };
 

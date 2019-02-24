@@ -13,6 +13,7 @@ struct VertexToPixel
 	//  v    v                v
 	float4 position		: SV_POSITION;
 	float3 normal		: NORMAL;
+	float2 uv			: TEXCOORD;
 	//float4 color		: COLOR;
 };
 struct DirectionalLight {
@@ -26,6 +27,8 @@ cbuffer externalData : register(b0)
 	DirectionalLight DirLight1;
 	DirectionalLight DirLight2;
 };
+Texture2D diffuseTexture	: register(t0);
+SamplerState basicSampler	: register(s0);
 
 float3 NdotL(float3 normal, float3 dir) {
 	float3 DirectionalLightDir = normalize(-dir);
@@ -46,9 +49,9 @@ float3 NdotL(float3 normal, float3 dir) {
 float4 main(VertexToPixel input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
-
+	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 	//Directional Light 1
-	float3 FinalDirectionalColor1 = NdotL(input.normal, DirLight1.Direction) * DirLight1.DiffuseColor + DirLight1.AmbientColor;
+	float3 FinalDirectionalColor1 = NdotL(input.normal, DirLight1.Direction) * DirLight1.DiffuseColor * + DirLight1.AmbientColor;
 
 	//Directional Light 2
 	float3 FinalDirectionalColor2 = NdotL(input.normal, DirLight2.Direction) * DirLight2.DiffuseColor + DirLight2.AmbientColor;
@@ -58,6 +61,6 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// - This color (like most values passing through the rasterizer) is 
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
-	return float4(FinalDirectionalColor1 + FinalDirectionalColor2,1);
+	return float4(FinalDirectionalColor1 * surfaceColor.rgb + FinalDirectionalColor2 * surfaceColor.rgb, 1);
 }
 
